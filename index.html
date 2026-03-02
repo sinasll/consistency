@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Consistency Calculator</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --card-bg: #f8f8f8;
+            --text-main: #000000;
+            --text-secondary: #555555;
+            --border-color: #000000;
+            --input-bg: #ffffff;
+            --button-bg: #000000;
+            --button-text: #ffffff;
+            --success-border: #000000;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --card-bg: #111111;
+            --text-main: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-color: #ffffff;
+            --input-bg: #1a1a1a;
+            --button-bg: #ffffff;
+            --button-text: #000000;
+            --success-border: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: var(--transition);
+            padding: 20px;
+        }
+
+        .calculator-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            padding: 40px;
+            border-radius: 0;
+            box-shadow: 10px 10px 0px var(--border-color);
+            transition: var(--transition);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: var(--text-main);
+            color: var(--bg-color);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-symbol {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px 15px 15px 30px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 1.1rem;
+            border-radius: 0;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input[type="number"]:focus {
+            border-width: 2px;
+        }
+
+        button.calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s ease;
+        }
+
+        button.calculate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .results {
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-row {
+            margin-bottom: 20px;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .status-box {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 20px;
+            background-color: var(--input-bg);
+        }
+
+        .status-pass {
+            border-left: 10px solid var(--text-main);
+        }
+
+        .status-fail {
+            border-left: 10px solid var(--text-secondary);
+            border-style: dashed;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 25px;
+                box-shadow: 5px 5px 0px var(--border-color);
+            }
+            input[type="number"] {
+                font-size: 1rem;
+                padding: 12px 12px 12px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container">
+        <header>
+            <h1>Consistency Calculator</h1>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">Dark Mode</button>
+        </header>
+
+        <div class="input-group">
+            <label for="biggestDay">Biggest Winning Day ($)</label>
+            <div class="input-wrapper">
+                <span class="input-symbol">$</span>
+                <input type="number" id="biggestDay" placeholder="e.g. 800" min="0" step="0">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="totalProfit">Total Current Profit ($)</label>
+            <div class="input-wrapper">
+                <span class="input-symbol">$</span>
+                <input type="number" id="totalProfit" placeholder="e.g. 3050" min="0" step="0">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="targetPercent">Target Consistency (%)</label>
+            <div class="input-wrapper">
+                <span class="input-symbol">%</span>
+                <input type="number" id="targetPercent" value="20" placeholder="20" min="1" max="100">
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculateConsistency()">Calculate Status</button>
+
+        <div class="results" id="resultsSection">
+            <div class="result-row">
+                <div class="result-label">Current Consistency Score</div>
+                <div class="result-value" id="scoreDisplay">0%</div>
+            </div>
+
+            <div id="statusBox" class="status-box">
+            </div>
+
+            <div class="explanation" id="mathExplanation">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                btn.innerText = "Dark Mode";
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerText = "Light Mode";
+            }
+        }
+
+        function calculateConsistency() {
+            const biggestDay = parseFloat(document.getElementById('biggestDay').value);
+            const totalProfit = parseFloat(document.getElementById('totalProfit').value);
+            const targetPercent = parseFloat(document.getElementById('targetPercent').value);
+
+            if (isNaN(biggestDay) || isNaN(totalProfit) || isNaN(targetPercent)) {
+                alert("Please enter valid numbers in all fields.");
+                return;
+            }
+
+            if (totalProfit === 0) {
+                alert("Total Profit cannot be zero.");
+                return;
+            }
+
+            const currentScore = (biggestDay / totalProfit) * 100;
+
+            const requiredProfit = biggestDay / (targetPercent / 100);
+            const profitNeeded = requiredProfit - totalProfit;
+
+            const resultsSection = document.getElementById('resultsSection');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const statusBox = document.getElementById('statusBox');
+            const mathExplanation = document.getElementById('mathExplanation');
+
+            resultsSection.style.display = 'block';
+            scoreDisplay.innerText = currentScore.toFixed(1) + "%";
+            if (currentScore <= targetPercent) {
+                statusBox.className = "status-box status-pass";
+                statusBox.innerHTML = `STATUS: ELIGIBLE FOR WITHDRAWAL`;
+                mathExplanation.innerHTML = `
+                    Your consistency score is <b>${currentScore.toFixed(1)}%</b>, which is below the limit of <b>${targetPercent}%</b>.<br><br>
+                    You have generated enough total profit relative to your biggest winning day ($${biggestDay.toLocaleString()}).
+                `;
+            } else {
+                statusBox.className = "status-box status-fail";
+                statusBox.innerHTML = `STATUS: KEEP TRADING`;
+                
+                mathExplanation.innerHTML = `
+                    Your score of <b>${currentScore.toFixed(1)}%</b> is higher than the allowed <b>${targetPercent}%</b>.<br><br>
+                    With a biggest day of $${biggestDay.toLocaleString()}, your Total Profit needs to reach <b>$${requiredProfit.toLocaleString()}</b> to qualify.<br><br>
+                    You need <b>+$${profitNeeded.toLocaleString()}</b> more in profit (without exceeding your current biggest winning day) to bring your consistency score down to ${targetPercent}%.
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
