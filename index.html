@@ -1,307 +1,916 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Consistency Calculator</title>
-    <style>
-        :root {
-            --bg-color: #ffffff;
-            --card-bg: #f8f8f8;
-            --text-main: #000000;
-            --text-secondary: #555555;
-            --border-color: #000000;
-            --input-bg: #ffffff;
-            --button-bg: #000000;
-            --button-text: #ffffff;
-            --success-border: #000000;
-            --transition: all 0.3s ease;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #000000;
-            --card-bg: #111111;
-            --text-main: #ffffff;
-            --text-secondary: #aaaaaa;
-            --border-color: #ffffff;
-            --input-bg: #1a1a1a;
-            --button-bg: #ffffff;
-            --button-text: #000000;
-            --success-border: #ffffff;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            transition: var(--transition);
-            padding: 20px;
-        }
-
-        .calculator-container {
-            width: 100%;
-            max-width: 500px;
-            background-color: var(--card-bg);
-            border: 2px solid var(--border-color);
-            padding: 40px;
-            border-radius: 0;
-            box-shadow: 10px 10px 0px var(--border-color);
-            transition: var(--transition);
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-        }
-
-        h1 {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .theme-toggle {
-            cursor: pointer;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 8px 12px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .theme-toggle:hover {
-            background: var(--text-main);
-            color: var(--bg-color);
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-symbol {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-main);
-            font-weight: bold;
-        }
-
-        input[type="number"] {
-            width: 100%;
-            padding: 15px 15px 15px 30px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            font-size: 1.1rem;
-            border-radius: 0;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        input[type="number"]:focus {
-            border-width: 2px;
-        }
-
-        button.calculate-btn {
-            width: 100%;
-            padding: 18px;
-            background-color: var(--button-bg);
-            color: var(--button-text);
-            border: none;
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.1s ease;
-        }
-
-        button.calculate-btn:active {
-            transform: scale(0.98);
-        }
-
-        .results {
-            margin-top: 30px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 30px;
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-row {
-            margin-bottom: 20px;
-        }
-
-        .result-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .result-value {
-            font-size: clamp(2rem, 6vw, 3rem);
-            font-weight: 800;
-            line-height: 1.1;
-        }
-
-        .status-box {
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            font-weight: 600;
-            font-size: 1rem;
-            margin-top: 20px;
-            background-color: var(--input-bg);
-        }
-
-        .status-pass {
-            border-left: 10px solid var(--text-main);
-        }
-
-        .status-fail {
-            border-left: 10px solid var(--text-secondary);
-            border-style: dashed;
-        }
-
-        .explanation {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: var(--text-secondary);
-        }
-
-        @media (max-width: 480px) {
-            .calculator-container {
-                padding: 25px;
-                box-shadow: 5px 5px 0px var(--border-color);
-            }
-            input[type="number"] {
-                font-size: 1rem;
-                padding: 12px 12px 12px 30px;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fund Kurd</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+    <header>
+        <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <button class="lang-btn" id="languageSwitcher" onclick="toggleLanguage()">EN</button>
+        <div class="logo"><img class="logo-img" src="FK.png" alt="Fund Kurd logo"></div>
+    </header>
 
-    <div class="calculator-container">
-        <header>
-            <h1>Consistency Calculator</h1>
-            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">Dark Mode</button>
-        </header>
+    <div class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
-        <div class="input-group">
-            <label for="biggestDay">Biggest Winning Day ($)</label>
-            <div class="input-wrapper">
-                <span class="input-symbol">$</span>
-                <input type="number" id="biggestDay" placeholder="e.g. 800" min="0" step="0">
-            </div>
+    <aside class="sidebar" id="sidebar">
+        <div class="logo"><img class="logo-img" src="FK.png" alt="Fund Kurd logo"></div>
+        <nav>
+            <a href="#" class="nav-link active" onclick="showPage(event, 'home')">
+                <i class="fas fa-landmark"></i> <span data-i18n="home">Prop Firms</span>
+            </a>
+            <a href="#" class="nav-link" onclick="showPage(event, 'discounts')">
+                <i class="fas fa-tag"></i> <span data-i18n="discount_codes">Discount Codes</span>
+            </a>
+            <a href="#" class="nav-link" onclick="showPage(event, 'rulesExplanation')">
+                <i class="fas fa-book-open"></i> <span data-i18n="rules_explanation_title">Rules Explanation</span>
+            </a>
+            <a href="#" class="nav-link" onclick="showPage(event, 'calculator')">
+                <i class="fas fa-calculator"></i> <span data-i18n="calculator_nav">Calculator</span>
+            </a>
+            <a href="#" class="nav-link disabled">
+                <i class="fas fa-trophy"></i> <span>Competition</span>
+            </a>
+            <a href="#" class="nav-link" onclick="showPage(event, 'about')">
+                <i class="fas fa-info-circle"></i> <span data-i18n="terms_and_guidelines_title">Terms and Guidelines</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main>
+        <div class="container">
+            <section id="home" class="page-section active">
+                <div class="hero">
+                    <h1 data-i18n="hero_title">Your Best Guide to Prop Firms</h1>
+                    <p data-i18n="hero_description">Find the cheapest and best prop firms for Kurdish traders here.</p>
+                </div>
+                <div class="grid" id="firm-grid"></div>
+            </section>
+
+            <section id="discounts" class="page-section">
+                <div class="hero">
+                    <h1 data-i18n="discount_codes">Discount Codes</h1>
+                </div>
+                <div class="grid" id="discount-grid"></div>
+            </section>
+
+            <section id="rulesExplanation" class="page-section">
+                <div class="hero">
+                    <h1 data-i18n="rules_explanation_title"></h1>
+                    <p data-i18n="rules_explanation_intro" style="color: white; font-size: 0.9rem; opacity: 0.95; max-width: 85%; line-height: 1.6; margin-top: 15px;"></p>
+                </div>
+                <div class="grid" id="rules-explanation-grid"></div>
+            </section>
+
+            <section id="calculator" class="page-section">
+                <div class="hero">
+                    <h1 data-i18n="calc_title">Consistency Calculator</h1>
+                    <p data-i18n="calc_desc" style="color: white; font-size: 0.9rem; opacity: 0.95; max-width: 85%; line-height: 1.6; margin-top: 15px;"></p>
+                </div>
+
+                <div class="card" style="max-width: 500px; margin: 0 auto; direction: ltr;">
+                    <div class="input-group" style="margin-bottom: 20px; text-align: start;">
+                        <label data-i18n="calc_biggest_day" style="display: block; margin-bottom: 8px; color: var(--gold); font-weight: bold;"></label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: bold;">$</span>
+                            <input type="number" id="biggestDay" placeholder="800" min="0" step="0" style="width: 100%; padding: 12px 15px 12px 35px; border-radius: 8px; border: 1px solid #333; background: rgba(0,0,0,0.3); color: white; direction: ltr; font-size: 1rem;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px; text-align: start;">
+                        <label data-i18n="calc_total_profit" style="display: block; margin-bottom: 8px; color: var(--gold); font-weight: bold;"></label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: bold;">$</span>
+                            <input type="number" id="totalProfit" placeholder="3050" min="0" step="0" style="width: 100%; padding: 12px 15px 12px 35px; border-radius: 8px; border: 1px solid #333; background: rgba(0,0,0,0.3); color: white; direction: ltr; font-size: 1rem;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 25px; text-align: start;">
+                        <label data-i18n="calc_target_percent" style="display: block; margin-bottom: 8px; color: var(--gold); font-weight: bold;"></label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: bold;">%</span>
+                            <input type="number" id="targetPercent" value="20" placeholder="20" min="1" max="100" style="width: 100%; padding: 12px 15px 12px 35px; border-radius: 8px; border: 1px solid #333; background: rgba(0,0,0,0.3); color: white; direction: ltr; font-size: 1rem;">
+                        </div>
+                    </div>
+
+                    <button class="btn primary-btn" style="width: 100%; font-size: 1.1rem; padding: 12px;" onclick="calculateConsistency()" data-i18n="calc_btn">Calculate</button>
+
+                    <div id="resultsSection" style="display: none; margin-top: 25px; padding-top: 20px; border-top: 1px solid #333;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span data-i18n="calc_current_score" style="font-weight: bold; color: white;"></span>
+                            <b id="scoreDisplay" style="color: var(--gold); font-size: 1.5rem; direction: ltr;">0%</b>
+                        </div>
+
+                        <div id="statusBox" style="padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem;"></div>
+
+                        <div id="mathExplanation" style="font-size: 0.95rem; line-height: 1.8; color: var(--muted); text-align: left;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about" class="page-section">
+                <div class="hero">
+                    <h1 data-i18n="terms_and_guidelines_title">Terms and Guidelines</h1>
+                    <p data-i18n="terms_intro_description" style="color: white; font-size: 0.9rem; opacity: 0.95; max-width: 85%; line-height: 1.6; margin-top: 15px;">
+                        At Fund Kurd, our main goal is to provide a trusted and safe environment for your success in the trading world. To protect both sides and keep everything transparent, the following points are the foundation of our work:
+                    </p>
+                </div>
+                <div class="grid terms-section">
+                    <h3><span data-i18n="term1_title"></span></h3>
+                    <p data-i18n="term1_desc"></p>
+
+                    <h3><span data-i18n="term2_title"></span></h3>
+                    <p data-i18n="term2_desc"></p>
+
+                    <h3><span data-i18n="term3_title"></span></h3>
+                    <p data-i18n="term3_desc"></p>
+
+                    <h3><span data-i18n="term4_title"></span></h3>
+                    <p data-i18n="term4_desc"></p>
+                </div>
+            </section>
         </div>
+    </main>
 
-        <div class="input-group">
-            <label for="totalProfit">Total Current Profit ($)</label>
-            <div class="input-wrapper">
-                <span class="input-symbol">$</span>
-                <input type="number" id="totalProfit" placeholder="e.g. 3050" min="0" step="0">
-            </div>
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            <div id="modal-body"></div>
         </div>
+    </div>
 
-        <div class="input-group">
-            <label for="targetPercent">Target Consistency (%)</label>
-            <div class="input-wrapper">
-                <span class="input-symbol">%</span>
-                <input type="number" id="targetPercent" value="20" placeholder="20" min="1" max="100">
-            </div>
-        </div>
+    <div class="modal-overlay" id="welcome-modal" onclick="closeWelcomeModal(event)">
+        <div class="modal-content" style="text-align: center; padding: 40px 20px 30px;" onclick="event.stopPropagation()">
+            <button class="close-modal" onclick="closeWelcomeModal()" style="left: 15px; right: auto;"><i class="fas fa-times"></i></button>
 
-        <button class="calculate-btn" onclick="calculateConsistency()">Calculate Status</button>
-
-        <div class="results" id="resultsSection">
-            <div class="result-row">
-                <div class="result-label">Current Consistency Score</div>
-                <div class="result-value" id="scoreDisplay">0%</div>
+            <div style="font-size: 48px; color: var(--gold); margin-bottom: 20px;">
+                <i class="fas fa-bell"></i>
             </div>
 
-            <div id="statusBox" class="status-box">
-            </div>
+            <p data-i18n="for-more" style="margin-bottom: 30px; font-size: 1rem; line-height: 1.6; color: var(--muted);">
+                For the latest information and offers, visit our Telegram channel or send us a message for more details.
+            </p>
 
-            <div class="explanation" id="mathExplanation">
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <a data-i18n="our-channel" href="https://t.me/fundkurd" target="_blank" rel="noopener noreferrer" class="btn primary-btn" onclick="closeWelcomeModal()">
+                    <i class="fab fa-telegram"></i> Our Channel
+                </a>
             </div>
         </div>
     </div>
 
-    <script>
-        function toggleTheme() {
-            const body = document.body;
-            const btn = document.getElementById('themeBtn');
-            const isDark = body.getAttribute('data-theme') === 'dark';
+    <div class="toast" id="toast" data-i18n="code_copied">Code copied</div>
 
-            if (isDark) {
-                body.removeAttribute('data-theme');
-                btn.innerText = "Dark Mode";
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAl0isgL-Kycr_Z2qSlWbH5Bqn0QL-0Il8",
+            authDomain: "fund-kurd-mini-app.firebaseapp.com",
+            projectId: "fund-kurd-mini-app",
+            storageBucket: "fund-kurd-mini-app.firebasestorage.app",
+            messagingSenderId: "520050036487",
+            appId: "1:520050036487:web:bb5ae05729bebfdbf1bfa2"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        db.settings({ experimentalForceLongPolling: true });
+
+        async function trackTelegramUser() {
+            try {
+                const tg = window.Telegram?.WebApp;
+                if (!tg) return;
+
+                const userData = tg.initDataUnsafe?.user;
+                if (!userData) return;
+
+                const userId = String(userData.id);
+                const userRef = db.collection("users").doc(userId);
+
+                await userRef.set({
+                    telegramId: userId,
+                    username: userData.username || userData.first_name,
+                    firstName: userData.first_name || "Anonymous",
+                    lastName: userData.last_name || null,
+                    languageCode: userData.language_code || "en",
+                    chatId: tg.initDataUnsafe.chat?.id || "personal",
+                    photoUrl: userData.photo_url || null,
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform
+                }, { merge: true });
+            } catch (error) {
+                console.error("User tracking failed:", error);
+            }
+        }
+
+        function closeWelcomeModal(event) {
+            if (!event || event.target.id === 'welcome-modal' || event.target.closest('.close-modal')) {
+                const modal = document.getElementById('welcome-modal');
+                if (modal) modal.classList.remove('active');
+            }
+        }
+
+        function closeModal(event) {
+            const overlay = document.getElementById('modal-overlay');
+            if (!event || event.target === overlay || event.target.closest('.close-modal')) {
+                if (overlay) overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function toggleSidebar(state) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (!sidebar || !overlay) return;
+
+            const isActive = state !== undefined ? state : !sidebar.classList.contains('active');
+            sidebar.classList.toggle('active', isActive);
+            overlay.classList.toggle('active', isActive);
+        }
+
+        if (window.Telegram?.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+        }
+
+        trackTelegramUser();
+    </script>
+
+    <script>
+        const translations = {
+            en: {
+                app_title: 'Fund Kurd',
+                home: 'Prop Firms',
+                discount_codes: 'Discount Codes',
+                terms_and_guidelines_title: 'Terms and Guidelines',
+                hero_title: 'Your Best Guide to Prop Firms',
+                hero_description: 'Find the cheapest and best prop firms for Kurdish traders here.',
+                see_more: 'See More',
+                visit_website: 'Visit Website',
+                code_copied: 'Code copied',
+                no_firms_found: 'No companies were found.',
+                for_more: 'For the latest information and offers, visit our Telegram channel or send us a message for more details.',
+                our_channel: 'Our Channel',
+                get_payout_maven: '10 trading days',
+
+                calculator_nav: 'Calculator',
+                calc_title: 'Consistency Calculator',
+                calc_desc: 'Calculate your consistency rate and see whether you are ready to withdraw profit.',
+                calc_biggest_day: 'Biggest Day Profit',
+                calc_total_profit: 'Current Total Profit',
+                calc_target_percent: 'Consistency Rule %',
+                calc_btn: 'Calculate',
+                calc_current_score: 'Your consistency rate:',
+                calc_error: 'Please enter valid numbers.',
+                calc_error_zero: 'Total profit cannot be zero.',
+                calc_status_pass: 'Ready to withdraw ✅',
+                calc_status_fail: 'Keep trading ⏳',
+                calc_pass_msg: 'Your rate is <b>{score}%</b>, which is below the allowed limit of <b>{target}%</b>.<br><br>You made a strong profit compared to your biggest day (<b>{biggest}$</b>). You are ready!',
+                calc_fail_msg: 'Your rate is <b>{score}%</b>, which is above the allowed limit of <b>{target}%</b>.<br><br>With a biggest day of <b>{biggest}$</b>, your total profit must reach <b>{required}$</b> so you can withdraw.<br><br>You need <b>+{needed}$</b> more profit (without creating a larger day) to bring your rate down to {target}%.',
+
+                biggestDiscount: 'Biggest discount',
+                bestModel: 'Best model',
+                payout: 'Payout',
+                profit_split: 'Profit split',
+                platforms: 'Platforms',
+                starting_from: 'Starting from',
+                price_without_discount: 'Account price without discount',
+                daily_drawdown: 'Daily drawdown',
+                max_drawdown: 'Max drawdown',
+                target_profit: 'Target profit',
+                consistency_rule: 'Consistency',
+                open_trades_drawdown: 'Open trade loss',
+                min_trading_days: 'Minimum trading days',
+                account_expiration: 'Account expiration',
+                trade_news: 'Trade news',
+                hold_weekends: 'Hold weekends',
+                not_applicable: 'Not applicable',
+                yes: 'Yes',
+                no: 'No',
+                phase_evaluation: 'Evaluation phase',
+                phase_funded: 'Funded phase',
+                phase_one: 'Phase one',
+                phase_two: 'Phase two',
+                phase_three: 'Phase three',
+                notes_prefix: 'Note:',
+                minimuim_withdraw: 'You can withdraw after 3% profit',
+
+                firm_gft_payout: 'Every 14 days',
+                firm_gft_profit_split: '80% to 100%',
+                firm_gft_guarantee: 'If your profit is not paid within 48 hours, you will receive $500 extra on top of your profit',
+                firm_mavem_guarantee: 'You can also trade gold on Saturdays and Sundays',
+
+                note_all_accounts_same_rules: 'All accounts in this model follow the same rules',
+                note_one_time_account: 'You can only get this account once',
+                note_24hrs_account: 'After your first trade, this account expires in 24 hours',
+                note_goat_blitz_temp: 'This model is temporary and appears unexpectedly during only two monthly sessions',
+                note_pay_later: 'Only a $5 upfront fee, then the account price is paid after passing, and all accounts in this model follow the same rules',
+                note_daily_profit_required: '(A 0.5% daily profit is required)',
+                days_duration: 'days',
+                maven_news: 'You are not allowed to open or close any trade within 2 minutes before and 2 minutes after major economic news releases',
+
+                buy_one_get_one_free: 'Buy one, get one free',
+                new_trader_discount: 'Discount for new traders',
+
+                terms_intro_description: 'At Fund Kurd, our main goal is to provide a trusted and safe environment for your success in the trading world. To protect both sides and keep everything transparent, the following points are the foundation of our work:',
+                term1_title: '1. Independent decision-making and risk:',
+                term1_desc: 'At Fund Kurd, we do not give any buy or sell advice or investment recommendations. Every financial decision you make is entirely your responsibility. Your success and results depend on your own skill level and how well you follow the company rules and goals.',
+                term2_title: '2. Selection guarantee:',
+                term2_desc: 'To protect your capital and rights and allow you to work without fear, we carefully work only with companies that have a guarantee system in place. This means the companies we choose fully take responsibility for your profits.',
+                term3_title: '3. Our responsibility limits:',
+                term3_desc: 'Financial transactions and profit distribution happen directly between you and the companies. Therefore, we are not responsible for external decisions such as delays or rejected profits from those companies.',
+                term4_title: '4. Ongoing support:',
+                term4_desc: 'Even with the points above, we want to assure you that problems or rejected profits are very rare, especially with companies that offer guarantees. But if any issue happens with a company, we will not leave you alone. We will use all our support and effort to help solve the issue and protect your interests.',
+
+                cheapest: 'Cheapest',
+                iqd_currency: 'IQD',
+                dollars_currency: 'USD',
+                coming_soon_title: 'Please wait',
+                coming_soon_description: 'More prop firms will be added soon',
+
+                rules_explanation_title: 'Rules Explanation',
+                rules_explanation_intro: 'Here we explain the main prop firm rules so you can understand how to work with them and protect yourself from rule violations and losing money.',
+
+                rule_daily_drawdown_title: '1. Daily drawdown',
+                rule_daily_drawdown_desc: 'A prop firm sets a fixed percentage, for example 5%. If you lose that amount or more in one day, you break the rule. This limit resets every day at a specific time.',
+                rule_max_drawdown_title: '2. Maximum drawdown',
+                rule_max_drawdown_desc: 'The maximum loss limit is the final red line in every prop firm account. If you pass this limit, your account is closed completely.',
+                rule_target_profit_title: '3. Target profit',
+                rule_target_profit_desc: 'This is the profit target you must reach to pass an evaluation phase and move to the next stage or receive a funded account. The target percentage changes from phase to phase.',
+                rule_consistency_rule_title: '4. Consistency rule',
+                rule_consistency_rule_desc: 'The consistency rule makes sure your profits stay stable over time. It says that no single trading day can make up 20% or more of your total profit during the payout period. If you break this rule, your account is not closed, but you cannot request a payout until your biggest profit day becomes less than 20%.',
+                rule_open_trades_drawdown_title: '5. Open trade loss',
+                rule_open_trades_drawdown_desc: 'This rule helps prevent large losses. It means that if the open PnL at any time goes below 2% of your account balance, your account may be closed.',
+                rule_min_trading_days_title: '6. Minimum trading days',
+                rule_min_trading_days_desc: 'This is the minimum number of trading days required to pass a phase.',
+                rule_account_expiration_title: '7. Account expiration',
+                rule_account_expiration_desc: 'Some prop firms set a time limit for evaluation phases. If you cannot reach the profit target within that time, the phase expires and you lose it.',
+                rule_trade_news_title: '8. Trade news',
+                rule_trade_news_desc: 'Trading during important news events is allowed. However, any trade opened or closed within 5 minutes before or after major news only counts as 1% profit, and the extra profit is removed.',
+                rule_hold_weekends_title: '9. Hold weekends',
+                rule_hold_weekends_desc: 'Yes, you can keep your trades open during weekends.'
+            }
+        };
+
+        let currentLang = 'en';
+        let sortAscending = true;
+
+        function t(key) {
+            return translations.en[key] !== undefined ? translations.en[key] : key;
+        }
+
+        function getDisplayValue(value) {
+            if (value === undefined || value === null) return '';
+            return translations.en[value] !== undefined ? translations.en[value] : value;
+        }
+
+        function updateTextContent() {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations.en[key] !== undefined) {
+                    element.innerHTML = translations.en[key];
+                }
+            });
+
+            const langSwitcher = document.getElementById('languageSwitcher');
+            if (langSwitcher) {
+                langSwitcher.textContent = 'EN';
+            }
+
+            document.documentElement.setAttribute('lang', 'en');
+            document.documentElement.setAttribute('dir', 'ltr');
+            document.title = t('app_title');
+        }
+
+        function toggleLanguage() {
+            currentLang = 'en';
+            updateTextContent();
+            const activePage = document.querySelector('.page-section.active');
+            if (activePage) {
+                const pageId = activePage.id;
+                if (pageId === 'home') renderHome(propFirms);
+                else if (pageId === 'discounts') renderDiscounts();
+                else if (pageId === 'rulesExplanation') renderRulesExplanation();
+                else if (pageId === 'about') renderAbout();
+            }
+        }
+
+        function arabicIndicToLatin(s = '') {
+            return String(s)
+                .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
+                .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0));
+        }
+
+        function parsePriceNumber(str = '') {
+            const latin = arabicIndicToLatin(str);
+            const cleaned = latin.replace(/[,٬\s]/g, '').replace(/[^\d.\-]/g, '');
+            const n = parseFloat(cleaned);
+            return Number.isFinite(n) ? n : NaN;
+        }
+
+        function triggerHaptic() {
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+            }
+        }
+
+        function closeWelcomeModal(event) {
+            if (!event || event.target.id === 'welcome-modal' || event.target.closest('.close-modal')) {
+                const modal = document.getElementById('welcome-modal');
+                if (modal) modal.classList.remove('active');
+            }
+        }
+
+        function closeModal(event) {
+            const overlay = document.getElementById('modal-overlay');
+            if (!event || event.target === overlay || event.target.closest('.close-modal')) {
+                if (overlay) overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function toggleSidebar(state) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (!sidebar || !overlay) return;
+
+            const isActive = state !== undefined ? state : !sidebar.classList.contains('active');
+            sidebar.classList.toggle('active', isActive);
+            overlay.classList.toggle('active', isActive);
+        }
+
+        function showPage(event, pageId) {
+            if (event) event.preventDefault();
+
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            const page = document.getElementById(pageId);
+            if (page) page.classList.add('active');
+
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+
+            toggleSidebar(false);
+            window.scrollTo(0, 0);
+
+            if (pageId === 'home') renderHome(propFirms);
+            else if (pageId === 'discounts') renderDiscounts();
+            else if (pageId === 'rulesExplanation') renderRulesExplanation();
+            else if (pageId === 'about') renderAbout();
+        }
+
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    toast.classList.add('active');
+                    setTimeout(() => {
+                        toast.classList.remove('active');
+                    }, 3000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy text:', err);
+            });
+        }
+
+        function renderHome(firmsToRender) {
+            const grid = document.getElementById('firm-grid');
+            if (!grid) return;
+
+            let cardsHtml = '';
+
+            if (!firmsToRender || firmsToRender.length === 0) {
+                cardsHtml = `<p style="text-align:center; grid-column: 1/-1; color: var(--muted);">${t('no_firms_found')}</p>`;
             } else {
-                body.setAttribute('data-theme', 'dark');
-                btn.innerText = "Light Mode";
+                cardsHtml = firmsToRender.map(firm => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-logo">
+                                <img src="${firm.logo}" alt="${firm.name} logo">
+                            </div>
+                            <div class="card-title">
+                                <h3>${firm.name}</h3>
+                            </div>
+                        </div>
+                        <div class="guarantee">${getDisplayValue(firm.guarantee)}</div>
+                        <div class="discount">${t('biggestDiscount')}<b>${getDisplayValue(firm.biggestDiscount)}</b></div>
+                        <div class="price-tag">${t('starting_from')} ${firm.cheapest} / ${firm.cheapestIQD}</div>
+                        <div class="card-stats">
+                            <div class="stat-item">${t('payout')}<b>${getDisplayValue(firm.payout)}</b></div>
+                            <div class="stat-item">${t('profit_split')}<b>${getDisplayValue(firm.profitSplit)}</b></div>
+                            <div class="stat-item">${t('platforms')}<b class="platform-item">${firm.platforms}</b></div>
+                        </div>
+                        <button class="btn-primary" onclick="renderModelSelection(${firm.id})">${t('see_more')}</button>
+                        <div class="code-box" style="margin-top: 20px; border-color: #d4af37; background: rgba(212, 175, 55, 0.1);">
+                            <a href="${firm.link}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: white; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span style="font-weight: bold; font-size: 0.9rem;">${t('visit_website')}</span>
+                                <i class="fas fa-external-link-alt" style="color: #d4af37;"></i>
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            cardsHtml += `
+                <div class="card coming-soon-card-enhanced" style="
+                    background: var(--elevated-bg-mid);
+                    position: relative;
+                    overflow: hidden;
+                    text-align: center;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 280px;
+                    padding: 25px;
+                    border-radius: var(--radius-lg, 12px);
+                    color: var(--text);
+                    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+                    grid-column: span 1;
+                    cursor: default;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+                ">
+                    <style>
+                        .coming-soon-card-enhanced:hover {
+                            transform: translateY(-8px) scale(1.03);
+                            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px var(--gold-primary);
+                            border: 2px solid var(--gold-light);
+                        }
+                        .coming-soon-card-enhanced:hover .coming-soon-icon {
+                            transform: scale(1.15) rotate(3deg);
+                            text-shadow: 0 0 20px var(--gold-light), 0 0 12px var(--gold-primary);
+                        }
+                        .coming-soon-card-enhanced:hover h3 {
+                            color: var(--gold-primary);
+                        }
+                    </style>
+                    <div class="coming-soon-icon" style="
+                        background: var(--gold-gradient);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        font-size: 4.5rem;
+                        margin-bottom: 15px;
+                        transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), text-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+                        text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+                    ">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h3 style="
+                        color: var(--gold-light);
+                        font-size: 2rem;
+                        margin-bottom: 15px;
+                        font-weight: bold;
+                        letter-spacing: 1.2px;
+                        text-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+                        transition: color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+                    ">${t('coming_soon_title')}</h3>
+                    <p style="
+                        color: var(--muted);
+                        font-size: 1rem;
+                        opacity: 0.95;
+                        max-width: 85%;
+                        line-height: 1.6;
+                    ">${t('coming_soon_description')}</p>
+                </div>
+            `;
+
+            grid.innerHTML = cardsHtml;
+        }
+
+        function filterFirms() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput ? searchInput.value.toLowerCase() : '';
+            const filtered = propFirms.filter(f => (f.name || '').toLowerCase().includes(query));
+            renderHome(filtered);
+        }
+
+        function sortFirms() {
+            sortAscending = !sortAscending;
+            propFirms.sort((a, b) => {
+                const aVal = parsePriceNumber(a.cheapest);
+                const bVal = parsePriceNumber(b.cheapest);
+                if (isNaN(aVal) || isNaN(bVal)) return 0;
+                return sortAscending ? aVal - bVal : bVal - aVal;
+            });
+            filterFirms();
+            const icon = document.querySelector('.sort-btn i');
+            if (icon) icon.className = sortAscending ? 'fas fa-sort-amount-down' : 'fas fa-sort-amount-up';
+        }
+
+        function renderDiscounts() {
+            const grid = document.getElementById('discount-grid');
+            if (!grid) return;
+
+            grid.innerHTML = propFirms.map(firm => `
+                <div class="card" style="text-align: center; direction: ltr;">
+                    <h2 class="text-gold" style="font-size: 1.5rem;">${firm.name}</h2>
+                    <div class="label" style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">${t('buy_one_get_one_free')}</div>
+                    <div class="code-box">
+                        <span style="font-weight: bold;">40%</span>
+                        <span style="font-weight: bold;">${firm.code}</span>
+                        <button class="copy-btn" onclick="copyCode('${firm.code}')">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                    ${(firm.extraCodes || []).map(exCode => `
+                        <div class="label" style="font-size: 0.8rem; color: #aaa;">${t('new_trader_discount')}</div>
+                        <div class="code-box" style="margin-top: 10px;">
+                            <span style="font-weight: bold;">50%</span>
+                            <span style="font-weight: bold;">${exCode}</span>
+                            <button class="copy-btn" onclick="copyCode('${exCode}')">
+                                <i class="far fa-copy"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                    <div class="code-box" style="margin-top: 20px; border-color: #d4af37; background: rgba(212, 175, 55, 0.1);">
+                        <a href="${firm.link}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: white; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span style="font-weight: bold; font-size: 0.9rem;">${t('visit_website')}</span>
+                            <i class="fas fa-external-link-alt" style="color: #d4af37;"></i>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRulesExplanation() {
+            const grid = document.getElementById('rules-explanation-grid');
+            if (!grid) return;
+
+            const rules = [
+                { titleKey: 'rule_daily_drawdown_title', descKey: 'rule_daily_drawdown_desc' },
+                { titleKey: 'rule_max_drawdown_title', descKey: 'rule_max_drawdown_desc' },
+                { titleKey: 'rule_target_profit_title', descKey: 'rule_target_profit_desc' },
+                { titleKey: 'rule_consistency_rule_title', descKey: 'rule_consistency_rule_desc' },
+                { titleKey: 'rule_open_trades_drawdown_title', descKey: 'rule_open_trades_drawdown_desc' },
+                { titleKey: 'rule_min_trading_days_title', descKey: 'rule_min_trading_days_desc' },
+                { titleKey: 'rule_account_expiration_title', descKey: 'rule_account_expiration_desc' },
+                { titleKey: 'rule_trade_news_title', descKey: 'rule_trade_news_desc' },
+                { titleKey: 'rule_hold_weekends_title', descKey: 'rule_hold_weekends_desc' }
+            ];
+
+            grid.innerHTML = rules.map(rule => `
+                <div class="card rule-explanation-card">
+                    <h3 style="color: white; font-size: 0.7rem; margin-bottom: 10px;">
+                        ${t(rule.titleKey)}
+                    </h3>
+                    <p style="color: white; font-size: 0.9rem; line-height: 1.8;">
+                        ${t(rule.descKey)}
+                    </p>
+                </div>
+            `).join('');
+        }
+
+        function renderAbout() {
+            updateTextContent();
+        }
+
+        function renderModelSelection(firmId) {
+            const firm = propFirms.find(f => f.id === firmId);
+            const modalBody = document.getElementById('modal-body');
+            const overlay = document.getElementById('modal-overlay');
+
+            if (!firm || !modalBody || !overlay) return;
+
+            let tabsHtml = '<div class="tabs">';
+            (firm.models || []).forEach((model, index) => {
+                tabsHtml += `<button class="tab-btn ${index === 0 ? 'active' : ''}" onclick="switchModel(${firmId}, ${index})">${model.name}</button>`;
+            });
+            tabsHtml += '</div>';
+
+            const accountsHtml = buildAccountsHtml(firm, 0, 0);
+
+            modalBody.innerHTML = `
+                <h2 style="margin-bottom: 20px;">${firm.name}</h2>
+                ${tabsHtml}
+                <div id="modal-accounts-container">${accountsHtml}</div>
+            `;
+
+            attachChevsIn(modalBody);
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function buildAccountsHtml(firm, modelIndex, activeSizeIndex = 0) {
+            const model = firm.models[modelIndex];
+            if (!model) return '';
+
+            let sizesHtml = '';
+            let priceHtml = '';
+
+            if (model.accounts && model.accounts.length > 0) {
+                const activeAccount = model.accounts[activeSizeIndex] || model.accounts[0];
+
+                sizesHtml = `<div class="size-tabs">`;
+
+                model.accounts.forEach((acc, idx) => {
+                    const activeClass = idx === activeSizeIndex ? 'active' : '';
+                    sizesHtml += `<button class="size-tab-btn ${activeClass}" onclick="switchAccountSize(${firm.id}, ${modelIndex}, ${idx})">${acc.size}</button>`;
+                });
+
+                sizesHtml += `</div>`;
+
+                priceHtml = `
+                    <div class="price-display">
+                        <span>${t('price_without_discount')}</span>
+                        <b>${activeAccount.price}</b>
+                    </div>
+                `;
+            }
+
+            const renderRules = (rulesObj, phaseTitle = '') => {
+                const titleHtml = phaseTitle ? `<h4 style="margin: 10px 0 5px; color: #d4af37;">${phaseTitle}</h4>` : '';
+
+                const getRuleValue = (rules, key) => {
+                    const val = rules[key];
+                    const unitKey = rules[key + 'UnitKey'];
+                    const noteKey = rules[key + 'NoteKey'];
+
+                    if (val === undefined || val === null || val === '' || val === 'n/a') {
+                        return t('not_applicable');
+                    }
+
+                    if (val === true || val === 'Yes') return t('yes');
+                    if (val === false || val === 'No') return t('no');
+
+                    let translatedValue = translations.en[val] !== undefined ? t(val) : String(val);
+
+                    if (typeof val === 'number' && unitKey) {
+                        translatedValue = `${val} ${t(unitKey)}`;
+                    }
+
+                    if (noteKey) {
+                        translatedValue += ` ${t(noteKey)}`;
+                    }
+
+                    return translatedValue;
+                };
+
+                return `
+                    ${titleHtml}
+                    <div class="rules-grid">
+                        <div class="stat-item">${t('daily_drawdown')} <b>${getRuleValue(rulesObj, 'daily')}</b></div>
+                        <div class="stat-item">${t('max_drawdown')} <b>${getRuleValue(rulesObj, 'max')}</b></div>
+                        <div class="stat-item">${t('target_profit')} <b>${getRuleValue(rulesObj, 'target')}</b></div>
+                        <div class="stat-item">${t('consistency_rule')} <b>${getRuleValue(rulesObj, 'consistency')}</b></div>
+                        <div class="stat-item">${t('open_trades_drawdown')} <b>${getRuleValue(rulesObj, 'rules')}</b></div>
+                        <div class="stat-item">${t('min_trading_days')} <b>${getRuleValue(rulesObj, 'mdays')}</b></div>
+                        <div class="stat-item">${t('account_expiration')} <b>${getRuleValue(rulesObj, 'expiration')}</b></div>
+                        <div class="stat-item">${t('trade_news')} <b>${getRuleValue(rulesObj, 'tradenews')}</b></div>
+                        <div class="stat-item">${t('hold_weekends')} <b>${getRuleValue(rulesObj, 'holdweekends')}</b></div>
+                    </div>
+                `;
+            };
+
+            let rulesContent = '';
+
+            if (model.notes && model.notes.length > 0) {
+                rulesContent += `<div class="notes-section" style="margin-top: 15px; padding: 10px; border: 1px dashed var(--muted); border-radius: 8px;">`;
+                model.notes.forEach(noteKey => {
+                    rulesContent += `<p style="font-size: 0.9em; margin-bottom: 5px; color: var(--muted);">
+                        <i class="fas fa-info-circle"></i> ${t(noteKey)}
+                    </p>`;
+                });
+                rulesContent += `</div>`;
+            }
+
+            if (model.phases && Array.isArray(model.phases) && model.phases.length > 0) {
+                rulesContent += model.phases.map(phase => `
+                    <div class="phase-card" style="margin-top: 20px;">
+                        ${renderRules(phase, phase.phase)}
+                    </div>
+                `).join('<hr style="border-color:#333; margin:20px 0;">');
+            }
+
+            return sizesHtml + priceHtml + rulesContent;
+        }
+
+        function attachChevsIn(rootEl = document) {
+            const nodes = rootEl.querySelectorAll('.tabs, .size-tabs');
+            nodes.forEach(n => attachChevsTo(n));
+        }
+
+        function attachChevsTo(tabsEl) {
+            if (!tabsEl || !tabsEl.parentNode) return;
+            if (tabsEl.closest('.tabs-wrapper.minimal')) return;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'tabs-wrapper minimal';
+
+            const leftChev = document.createElement('button');
+            leftChev.className = 'chev chev-left';
+            leftChev.setAttribute('aria-label', 'scroll left');
+            leftChev.innerHTML = '<i class="fas fa-chevron-left" aria-hidden="true"></i>';
+            if (!leftChev.querySelector('i')) leftChev.textContent = '◀';
+
+            const rightChev = document.createElement('button');
+            rightChev.className = 'chev chev-right';
+            rightChev.setAttribute('aria-label', 'scroll right');
+            rightChev.innerHTML = '<i class="fas fa-chevron-right" aria-hidden="true"></i>';
+            if (!rightChev.querySelector('i')) rightChev.textContent = '▶';
+
+            const isRTL = getComputedStyle(tabsEl).direction === 'rtl';
+            const step = Math.round(tabsEl.clientWidth * 0.6) || 200;
+
+            tabsEl.parentNode.insertBefore(wrapper, tabsEl);
+            if (isRTL) {
+                wrapper.appendChild(rightChev);
+                wrapper.appendChild(tabsEl);
+                wrapper.appendChild(leftChev);
+            } else {
+                wrapper.appendChild(leftChev);
+                wrapper.appendChild(tabsEl);
+                wrapper.appendChild(rightChev);
+            }
+
+            function update() {
+                const overflowing = tabsEl.scrollWidth > tabsEl.clientWidth + 4;
+                leftChev.style.display = overflowing ? 'inline-flex' : 'none';
+                rightChev.style.display = overflowing ? 'inline-flex' : 'none';
+
+                if (isRTL) {
+                    const absScrollLeft = Math.abs(Math.round(tabsEl.scrollLeft));
+                    const maxScrollLeft = Math.abs(Math.round(tabsEl.scrollWidth - tabsEl.clientWidth));
+                    leftChev.style.opacity = (absScrollLeft >= (maxScrollLeft - 6)) ? '0.35' : '1';
+                    rightChev.style.opacity = (absScrollLeft <= 6) ? '0.35' : '1';
+                } else {
+                    leftChev.style.opacity = (tabsEl.scrollLeft <= 6) ? '0.35' : '1';
+                    rightChev.style.opacity = (tabsEl.scrollLeft >= tabsEl.scrollWidth - tabsEl.clientWidth - 6) ? '0.35' : '1';
+                }
+            }
+
+            leftChev.addEventListener('click', e => {
+                e.stopPropagation();
+                const dir = isRTL ? step : -step;
+                tabsEl.scrollBy({ left: dir, behavior: 'smooth' });
+            });
+
+            rightChev.addEventListener('click', e => {
+                e.stopPropagation();
+                const dir = isRTL ? -step : step;
+                tabsEl.scrollBy({ left: dir, behavior: 'smooth' });
+            });
+
+            tabsEl.addEventListener('scroll', update);
+            window.addEventListener('resize', update);
+
+            requestAnimationFrame(update);
+        }
+
+        function switchModel(firmId, modelIndex) {
+            const firm = propFirms.find(f => f.id === firmId);
+            const container = document.getElementById('modal-accounts-container');
+            if (container && firm) {
+                container.innerHTML = buildAccountsHtml(firm, modelIndex, 0);
+                const modalBody = document.getElementById('modal-body');
+                attachChevsIn(modalBody);
+            }
+
+            document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+                if (idx === modelIndex) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function switchAccountSize(firmId, modelIndex, sizeIndex) {
+            const firm = propFirms.find(f => f.id === firmId);
+            const container = document.getElementById('modal-accounts-container');
+            if (container && firm) {
+                container.innerHTML = buildAccountsHtml(firm, modelIndex, sizeIndex);
+                const modalBody = document.getElementById('modal-body');
+                attachChevsIn(modalBody);
             }
         }
 
         function calculateConsistency() {
+            triggerHaptic();
+
             const biggestDay = parseFloat(document.getElementById('biggestDay').value);
             const totalProfit = parseFloat(document.getElementById('totalProfit').value);
             const targetPercent = parseFloat(document.getElementById('targetPercent').value);
 
             if (isNaN(biggestDay) || isNaN(totalProfit) || isNaN(targetPercent)) {
-                alert("Please enter valid numbers in all fields.");
+                alert(t('calc_error'));
                 return;
             }
 
             if (totalProfit === 0) {
-                alert("Total Profit cannot be zero.");
+                alert(t('calc_error_zero'));
                 return;
             }
 
             const currentScore = (biggestDay / totalProfit) * 100;
-
             const requiredProfit = biggestDay / (targetPercent / 100);
             const profitNeeded = requiredProfit - totalProfit;
 
@@ -311,24 +920,661 @@
             const mathExplanation = document.getElementById('mathExplanation');
 
             resultsSection.style.display = 'block';
-            scoreDisplay.innerText = currentScore.toFixed(1) + "%";
+            scoreDisplay.innerText = currentScore.toFixed(1) + '%';
+
             if (currentScore <= targetPercent) {
-                statusBox.className = "status-box status-pass";
-                statusBox.innerHTML = `STATUS: ELIGIBLE FOR WITHDRAWAL`;
-                mathExplanation.innerHTML = `
-                    Your consistency score is <b>${currentScore.toFixed(1)}%</b>, which is below the limit of <b>${targetPercent}%</b>.<br><br>
-                    You have generated enough total profit relative to your biggest winning day ($${biggestDay.toLocaleString()}).
-                `;
+                statusBox.style.backgroundColor = 'rgba(40, 167, 69, 0.15)';
+                statusBox.style.color = '#4ade80';
+                statusBox.style.border = '1px solid #4ade80';
+                statusBox.innerHTML = t('calc_status_pass');
+
+                const passMsg = t('calc_pass_msg')
+                    .replace('{score}', currentScore.toFixed(1))
+                    .replace('{target}', targetPercent)
+                    .replace('{biggest}', biggestDay.toLocaleString());
+
+                mathExplanation.innerHTML = passMsg;
             } else {
-                statusBox.className = "status-box status-fail";
-                statusBox.innerHTML = `STATUS: KEEP TRADING`;
-                
-                mathExplanation.innerHTML = `
-                    Your score of <b>${currentScore.toFixed(1)}%</b> is higher than the allowed <b>${targetPercent}%</b>.<br><br>
-                    With a biggest day of $${biggestDay.toLocaleString()}, your Total Profit needs to reach <b>$${requiredProfit.toLocaleString()}</b> to qualify.<br><br>
-                    You need <b>+$${profitNeeded.toLocaleString()}</b> more in profit (without exceeding your current biggest winning day) to bring your consistency score down to ${targetPercent}%.
-                `;
+                statusBox.style.backgroundColor = 'rgba(220, 53, 69, 0.15)';
+                statusBox.style.color = '#f87171';
+                statusBox.style.border = '1px solid #f87171';
+                statusBox.innerHTML = t('calc_status_fail');
+
+                const failMsg = t('calc_fail_msg')
+                    .replace(/\{score\}/g, currentScore.toFixed(1))
+                    .replace(/\{target\}/g, targetPercent)
+                    .replace('{biggest}', biggestDay.toLocaleString())
+                    .replace('{required}', requiredProfit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }))
+                    .replace('{needed}', profitNeeded.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }));
+
+                mathExplanation.innerHTML = failMsg;
             }
+        }
+
+        const propFirms = [
+            {
+                id: 1,
+                name: "Goat Funded Trader",
+                code: "BOGO40",
+                extraCodes: ["FIRSTGFT"],
+                logo: "GFT.png",
+                cheapest: "$1",
+                cheapestIQD: "1,556 IQD",
+                biggestDiscount: "50%",
+                payout: "firm_gft_payout",
+                profitSplit: "firm_gft_profit_split",
+                platforms: "MT5 - TradeLocker - CTrader - MatchTrader - Volumetrica",
+                link: "https://checkout.goatfundedtrader.com/aff/fundkurd/",
+                guarantee: "firm_gft_guarantee",
+                models: [
+                    {
+                        name: "Instant PRO",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$2,500", price: "$68" },
+                            { size: "$5,000", price: "$118" },
+                            { size: "$10,000", price: "$168" },
+                            { size: "$15,000", price: "$238" },
+                            { size: "$25,000", price: "$328" },
+                            { size: "$50,000", price: "$498" },
+                            { size: "$100,000", price: "$858" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Funded phase",
+                                daily: "3%",
+                                max: "4% drawdown",
+                                target: undefined,
+                                consistency: "20%",
+                                rules: "2%",
+                                mdays: 5,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Instant GOAT",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$5,000", price: "$108" },
+                            { size: "$10,000", price: "$158" },
+                            { size: "$15,000", price: "$228" },
+                            { size: "$25,000", price: "$318" },
+                            { size: "$50,000", price: "$488" },
+                            { size: "$100,000", price: "$838" },
+                            { size: "$150,000", price: "$1,198" },
+                            { size: "$200,000", price: "$1,708" },
+                            { size: "$250,000", price: "$2,088" },
+                            { size: "$300,000", price: "$2,398" },
+                            { size: "$400,000", price: "$2,998" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Funded phase",
+                                daily: "3% drawdown",
+                                max: "6% drawdown",
+                                target: undefined,
+                                consistency: "15%",
+                                rules: "2%",
+                                mdays: 5,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Goat 1$",
+                        notes: ["note_one_time_account"],
+                        accounts: [
+                            { size: "$1,000", price: "$1" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Funded phase",
+                                daily: "3% drawdown",
+                                max: "6% drawdown",
+                                target: "Not available",
+                                consistency: "15%",
+                                rules: "2%",
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: 28,
+                                expirationUnitKey: "days_duration",
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Pay Later",
+                        notes: ["note_pay_later"],
+                        accounts: [
+                            { size: "$5,000", price: "$5" },
+                            { size: "$10,000", price: "$5" },
+                            { size: "$15,000", price: "$5" },
+                            { size: "$25,000", price: "$5" },
+                            { size: "$50,000", price: "$5" },
+                            { size: "$100,000", price: "$5" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Evaluation phase",
+                                daily: undefined,
+                                max: "8%",
+                                target: "4%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: undefined,
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Funded phase",
+                                daily: "3% drawdown",
+                                max: "6% drawdown",
+                                target: undefined,
+                                consistency: "20%",
+                                rules: "2%",
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "1 Step",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$15,000", price: "$178" },
+                            { size: "$25,000", price: "$248" },
+                            { size: "$50,000", price: "$358" },
+                            { size: "$100,000", price: "$678" },
+                            { size: "$200,000", price: "$1,098" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Evaluation phase",
+                                daily: "4%",
+                                max: "6%",
+                                target: "10%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Funded phase",
+                                daily: "4%",
+                                max: "6%",
+                                target: "10%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "2 Step Standard",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$5,000", price: "$52" },
+                            { size: "$8,000", price: "$108" },
+                            { size: "$15,000", price: "$208" },
+                            { size: "$25,000", price: "$228" },
+                            { size: "$50,000", price: "$338" },
+                            { size: "$100,000", price: "$594" },
+                            { size: "$200,000", price: "$1,174" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Phase one",
+                                daily: "5%",
+                                max: "10%",
+                                target: "10%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase two",
+                                daily: "5%",
+                                max: "10%",
+                                target: "5%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "2 Step Goat",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$5,000", price: "$36" },
+                            { size: "$8,000", price: "$56" },
+                            { size: "$15,000", price: "$98" },
+                            { size: "$25,000", price: "$148" },
+                            { size: "$50,000", price: "$288" },
+                            { size: "$100,000", price: "$458" },
+                            { size: "$150,000", price: "$728" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Phase one",
+                                daily: "4%",
+                                max: "10%",
+                                target: "8%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase two",
+                                daily: "4%",
+                                max: "10%",
+                                target: "6%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "2 Step Pro",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$5,000", price: "$62" },
+                            { size: "$8,000", price: "$92" },
+                            { size: "$15,000", price: "$168" },
+                            { size: "$25,000", price: "$238" },
+                            { size: "$50,000", price: "$318" },
+                            { size: "$100,000", price: "$588" },
+                            { size: "$200,000", price: "$1,098" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Phase one",
+                                daily: "4%",
+                                max: "8%",
+                                target: "8%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase two",
+                                daily: "4%",
+                                max: "8%",
+                                target: "4%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "3 Step",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$10,000", price: "$65" },
+                            { size: "$15,000", price: "$85" },
+                            { size: "$25,000", price: "$145" },
+                            { size: "$50,000", price: "$225" },
+                            { size: "$100,000", price: "$365" },
+                            { size: "$200,000", price: "$665" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Phase one",
+                                daily: "4%",
+                                max: "8%",
+                                target: "6%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: undefined,
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase two",
+                                daily: "4%",
+                                max: "8%",
+                                target: "6%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: undefined,
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase three",
+                                daily: "4%",
+                                max: "8%",
+                                target: "6%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: undefined,
+                                expiration: undefined,
+                                tradenews: "Yes",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                name: "Maven",
+                code: "MATCH",
+                logo: "MV.jpg",
+                cheapest: "$13",
+                cheapestIQD: "20,000 IQD",
+                biggestDiscount: "4%",
+                payout: "get_payout_maven",
+                profitSplit: "80%",
+                platforms: "MT5 - MatchTrader",
+                link: "https://maventrading.com/?ref=y2viyzr",
+                guarantee: "firm_mavem_guarantee",
+                models: [
+                    {
+                        name: "Standard 1 Step",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$2,000", price: "$15" },
+                            { size: "$5,000", price: "$19" },
+                            { size: "$10,000", price: "$37" },
+                            { size: "$20,000", price: "$68" },
+                            { size: "$50,000", price: "$170" },
+                            { size: "$100,000", price: "$380" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Evaluation phase",
+                                daily: "3%",
+                                max: "5% drawdown",
+                                target: "8%",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "Not applicable",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Funded phase",
+                                daily: "3%",
+                                max: "5% drawdown",
+                                target: "10%",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "Not applicable",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Standard 2 Step",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$2,000", price: "$19" },
+                            { size: "$5,000", price: "$22" },
+                            { size: "$10,000", price: "$44" },
+                            { size: "$20,000", price: "$88" },
+                            { size: "$50,000", price: "$220" },
+                            { size: "$100,000", price: "$440" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Phase one",
+                                daily: "4%",
+                                max: "8%",
+                                target: "8%",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase two",
+                                daily: "4%",
+                                max: "8%",
+                                target: "5%",
+                                consistency: undefined,
+                                rules: undefined,
+                                mdays: 3,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Funded phase",
+                                daily: "4%",
+                                max: "8%",
+                                target: "Not applicable",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "Not applicable",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Standard 3 Step",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$2,000", price: "$13" },
+                            { size: "$5,000", price: "$17" },
+                            { size: "$10,000", price: "$38" },
+                            { size: "$20,000", price: "$76" },
+                            { size: "$50,000", price: "$190" },
+                            { size: "$100,000", price: "$299" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Phase one",
+                                daily: "2%",
+                                max: "3%",
+                                target: "6%",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "Not applicable",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase two",
+                                daily: "2%",
+                                max: "3%",
+                                target: "6%",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "Not applicable",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Phase three",
+                                daily: "2%",
+                                max: "3%",
+                                target: "6%",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "Not applicable",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            },
+                            {
+                                phase: "Funded phase",
+                                daily: "2%",
+                                max: "3%",
+                                target: "6%",
+                                consistency: "Not applicable",
+                                rules: "Not applicable",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "Not applicable",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Instant",
+                        notes: ["note_all_accounts_same_rules"],
+                        accounts: [
+                            { size: "$2,000", price: "$15" },
+                            { size: "$5,000", price: "$19" },
+                            { size: "$10,000", price: "$37" },
+                            { size: "$20,000", price: "$68" },
+                            { size: "$50,000", price: "$170" },
+                            { size: "$100,000", price: "$380" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Funded phase",
+                                daily: "3% drawdown",
+                                max: "6% drawdown",
+                                target: "You can withdraw after 3% profit",
+                                consistency: "20%",
+                                rules: "1%",
+                                mdays: 5,
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: undefined,
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Mini",
+                        notes: ["note_24hrs_account"],
+                        accounts: [
+                            { size: "$2,000", price: "$13" },
+                            { size: "$5,000", price: "$17" },
+                            { size: "$10,000", price: "$38" },
+                            { size: "$20,000", price: "$76" },
+                            { size: "$50,000", price: "$190" },
+                            { size: "$100,000", price: "$299" }
+                        ],
+                        phases: [
+                            {
+                                phase: "Funded phase",
+                                daily: "3% drawdown",
+                                max: "6% drawdown",
+                                target: "Not applicable",
+                                consistency: "20%",
+                                rules: "1%",
+                                mdays: "Not applicable",
+                                mdaysNoteKey: "note_daily_profit_required",
+                                expiration: "24 hours",
+                                expirationUnitKey: "days_duration",
+                                tradenews: "maven_news",
+                                holdweekends: "Yes"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        function renderAbout() {
+            updateTextContent();
+        }
+
+        function renderAbout() {
+            updateTextContent();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTextContent();
+
+            const welcomeModal = document.getElementById('welcome-modal');
+            if (welcomeModal) {
+                setTimeout(() => {
+                    welcomeModal.classList.add('active');
+                }, 500);
+            }
+
+            renderHome(propFirms);
+            renderDiscounts();
+            renderRulesExplanation();
+            renderAbout();
+
+            if (window.Telegram?.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+            }
+
+            trackTelegramUser();
+        });
+
+        document.addEventListener('click', e => {
+            const target = e.target.closest('button, a, .tab-btn, .nav-link, .copy-btn, .size-tab-btn, .learn-tab-btn');
+            if (target) {
+                triggerHaptic();
+            }
+        });
+
+        function hapticOnInteraction() {
+            triggerHaptic();
         }
     </script>
 </body>
